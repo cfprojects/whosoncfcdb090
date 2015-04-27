@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<transfer xsi:noNamespaceSchemaLocation="/transfer/resources/xsd/transfer.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<objectDefinitions>
+		
+		<package name="whosoncfc">
+			
+			<object name="user" table="ActiveUsers">
+				<id name="ClientID" type="string" />
+				<property name="UserID" type="string" />
+				<property name="Roles" type="string" nullable="true" />
+				<property name="Created" type="date" />
+				<property name="LastUpdated" type="date" />
+				<property name="Referer" type="string" nullable="true" />
+				<property name="IP" type="string" />
+				<property name="HostName" type="string" />
+				<property name="HideClient" type="boolean" />
+				<property name="Coords" type="string" nullable="true" />
+				<property name="Country" type="string" nullable="true" />
+				<property name="City" type="string" nullable="true" />
+				<property name="EntryPage" type="string" />
+				<property name="CurrentPage" type="string" />
+				<property name="PageHits" type="numeric" />
+				<property name="UserAgent" type="string" nullable="true" />
+				<property name="ServerName" type="string" nullable="true" />
+    			<onetomany name="pageHistory" lazy="true">
+          			<link to="whosoncfc.pageHits" column="ClientID" />
+          			<collection type="array" />
+    			</onetomany>			
+			</object>
+			
+			<object name="pageHits" table="PageHistory">
+				<id name="ClientID" type="string" />
+				<property name="Page" type="string" />
+				<property name="LoadTime" type="date" />
+			</object>
+			
+		</package>
+		
+	</objectDefinitions>
+	
+</transfer>

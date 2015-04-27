@@ -1,0 +1,121 @@
+WhosOnCFC Version 2.0.0 Release Notes
+Shane Zehnder (1/30/2008)
+
+::: Update History :::
+2.0.0 : 	-Added whosonstats.cfc, a component used for tracking
+		the top stats from whoson.cfc.
+
+1.1.4 :	-Bot protection has been moved to app.bot-protection.cfm
+		if you would like to use it.  Rename to application.cfm
+		and you should be good to go.
+		-botList has been moved back inside WhosOnCFC
+		-Added Rob Gonda's ObjectFactory CFC and future support
+		for WhosOnCFCStats
+
+1.1.3 :	-Added spider/bot session management per discussion
+		on Ben Nadel's blog.
+		-Added EntryPage to shows initial page viewed by a 
+		client on the web site.
+		-Added PageCount to show number of pages visited 
+		during a session.
+		-botList is now an argument that must be passed in the
+		init() method of the component.
+
+1.1.2 :	-Added getUserList() function.  Returns a CSV list of 
+		users currently online.  Things brings it up to date
+		with the current SVN version.
+
+1.1.1 :	-Joe Danziger noticed UserID was not getting updated
+		after it was created.  This bug was fixed.  Thanks Joe.
+		-WhosOnUserTracker() now returns a boolean value to
+		determine if a user exists.  Returns true if the user
+		was found, otherwise, returns false if the user had
+		to be created.
+
+1.1.0	:	-Updated botList thanks to Joshua Cyr
+		-Added getGeoInfo function.  Will return the user's 
+		country, city, and coordinates if available.
+		-Added getHostName function to return a DNS lookup of
+		an IP address if available.
+		-Added PageHistory.  Allows you to track pages viewed
+		during a session for a predetermined amount of time.
+		-Added new arguments to WhosOnPageTracker so these
+		features can be enabled/disabled.
+		-Modified default configuration script.  Now handles
+		SES urls.
+
+1.0.1	:	Added optional parameter showBots that defaults to false.  		I have started with adding a few bots, it is by no means
+		complete and I plan on adding more as I find them.
+		If you want to see the bots listed you just need to call
+		WhosOnUserTracker(whoson=struct,showBots=true)
+-----------------------------------------------------------------------
+
+::: 2.0.0 Release Notes :::
+
+Stat tracking is enabled by default.  To disable stat tracking, remove the whosonstats.cfc component from application.cfm and comment out the setStats method so it is not called when whoson.cfc is created.
+
+-----------------------------------------------------------------------
+
+Hello.  Thanks for taking the time to check out WhosOnCFC, the component version of my WhosOn user tracking system.  Other versions of WhosOn were just functions included in the application.cfm that performed user tracking.  This version is designed to be an instanced-based component meaning it is loaded in memory and remembers its state and information.  In this case, the information is users currently viewing the site.
+
+I realize my documentation leaves a lot to be desired.  Also included is a demo application so you can see it in action.
+
+::: Setting up the component :::
+
+The default behavior of the component can be changed by editing these arguments in the WhosOnPageTracker function.  This should be self-explanatory, but for arguments sake:
+
+showBots	: true/FALSE, if true, all user agents will be shown
+geoTrack	: TRUE/false, if true it will attempt to locate the 
+		  clients physical location
+pageHistory	: TRUE/false, if true it will remember the pages visited
+		  in the last 10 minutes by default
+
+::: Setting up the configuration information :::
+
+The configuration information has changed from previous versions.  Since the component has no knowledge of variables set outside of its scope, all the information you want to track on the user needs to be set before it is passed for tracking.  Here is the default information we are tracking.
+
+<cfscript>
+	thisRequest=structNew();
+	thisRequest.thisClient=session.sessionid;
+	thisRequest.thisUser=session.user;
+	thisRequest.Referer=CGI.HTTP_REFERER;
+	thisRequest.IP=CGI.REMOTE_ADDR;
+	if(CGI.PATH_INFO is CGI.SCRIPT_NAME){
+		thisRequest.CurrentPage=CGI.SCRIPT_NAME;
+	}else{
+		thisRequest.CurrentPage=CGI.SCRIPT_NAME & CGI.PATH_INFO;
+	}
+	thisRequest.QueryString=CGI.QUERY_STRING;
+	thisRequest.ServerName=CGI.SERVER_NAME;
+	thisRequest.Prefix="http://";
+	if(CGI.HTTPS is "on") thisRequest.Prefix="https://";
+	thisRequest.UserAgent=CGI.HTTP_USER_AGENT;
+	
+	thisRequest.defaultTimeout=60;
+</cfscript>
+
+Here is a basic run-down on what everything does:
+
+thisClient		: A sessionid or clientid for the client we are 			  tracking
+thisUser  		: User name or id for the current user
+Referer		: Where did the client come from
+IP			: IP address of the client
+CurrentPage		: The current page being viewed
+QueryString		: Any url parameters passed to the page
+ServerName		: The name of the server, i.e., www.yourdomain.com
+Prefix		: http:// or https:// for a secure site
+UserAgent		: Browser being used.	
+defaultTimeout	: Time in minutes to remember a user's last hit
+
+If you decide to add or remove any structure members from the thisRequest structure, you must also edit the WhosOnPageTracker() function in WhosOn.cfc to reflect those changes.
+
+I have included a sample application so you can see it in action.
+
+::: Other notes and Disclaimers :::
+
+That is all there is to it.  It's a very easy system to get implemented.  If you unzip this archive into a directory on your server, it should work as is.
+
+Of course, we have to have the basic disclaimers.  If you use this code and your server blows up, your hair turns green, and your teeth all fall out, I assume no responsibility.  
+
+If you wish to contact me you can e-mail me: shanez@kisdigital.com
+or contact me on my website at http://www.kisdigital.com/
